@@ -1,7 +1,13 @@
+// Chiffres arabes (٠١٢…) ou persans (۰۱۲…) → 0-9 : certains claviers de téléphone les tapent.
+// (U+0660 et U+06F0 sont des multiples de 16, donc « code % 16 » donne le chiffre.)
+export const toLatinDigits = (text) =>
+  String(text).replace(/[٠-٩۰-۹]/g, (digit) => String(digit.charCodeAt(0) % 16));
+
 // Numéro de téléphone au format international sans « + » (ex : 213555123456), ou null s'il est invalide.
-// Accepte « 0555 12 34 56 », « 555123456 », « +213 555… », « 00213… » et les numéros étrangers (+33…).
+// Accepte « 0555 12 34 56 », « 555123456 », « +213 555… », « +213 0555… », « 00213… »
+// et les numéros étrangers (+33…).
 export function normalizePhone(raw) {
-  const input = String(raw).trim();
+  const input = toLatinDigits(raw).trim();
   let digits = input.replace(/\D/g, "");
   if (!digits) return null;
 
@@ -10,6 +16,9 @@ export function normalizePhone(raw) {
     else if (digits.startsWith("0")) digits = `213${digits.slice(1)}`;
     else if (digits.length === 9) digits = `213${digits}`;
   }
+
+  // « +213 0555… » : le 0 du numéro local est souvent gardé après l'indicatif.
+  if (digits.startsWith("2130")) digits = `213${digits.slice(4)}`;
 
   // Algérie : uniquement les mobiles (05, 06, 07) — ce sont eux que Meta sait associer à un compte.
   if (digits.startsWith("213")) return /^213[567]\d{8}$/.test(digits) ? digits : null;

@@ -19,7 +19,7 @@ import Eyebrow from "@/components/Eyebrow";
 import Logo from "@/components/Logo";
 import { site } from "@/config/site";
 import { ABROAD, wilayas } from "@/data/wilayas";
-import { formatAmount, formatDate, formatPhone, normalizePhone, toISODate } from "@/lib/format";
+import { formatAmount, formatDate, formatPhone, normalizePhone, toISODate, toLatinDigits } from "@/lib/format";
 import { isSheetConfigured, submitSale } from "@/lib/sheets";
 import { cn, img } from "@/lib/utils";
 
@@ -479,7 +479,9 @@ const FicheClient = () => {
                       <input
                         {...bind("amount")}
                         value={formatAmount(form.amount)}
-                        onChange={(event) => setField("amount", event.target.value.replace(/\D/g, "").slice(0, 9))}
+                        onChange={(event) =>
+                          setField("amount", toLatinDigits(event.target.value).replace(/\D/g, "").slice(0, 9))
+                        }
                         inputMode="numeric"
                         autoComplete="off"
                         placeholder="Ex : 85 000"
